@@ -11,7 +11,7 @@ import Playground exposing (..)
 -- PHYSICS PARAMETERS
 
 runSpeed = 3
-coast = 0.9
+coast = 0.95
 jumpPower = 8
 jumpCutoff = 0.5
 gravity = 0.2
@@ -85,17 +85,17 @@ update computer mario =
       let keyX = (toX computer.keyboard) in
         if keyX /= 0 then keyX * runSpeed else (mario.vx * coast)
 
-    gravityApplied = mario.vy - dt * gravity
+    -- Mario can now fly!
     vy =
-      if mario.y == 0 && computer.keyboard.up then  -- on ground, new jump starts
-        jumpPower
-      else if computer.keyboard.up then  -- in air, holding jump key for long jump
-        gravityApplied
-      else
-        min jumpCutoff gravityApplied  -- jump key released, limit speed to allow var height jumps
-
+      if computer.keyboard.up then
+        jumpPower / 2
+      else if computer.keyboard.down && mario.y > 0 then 
+        -jumpPower / 2
+      else 
+        if mario.y > 0 then mario.vy * coast else 0
+    
     newX = mario.x + dt * vx
-    newY = max 0 (mario.y + dt * vy)
+    newY = mario.y + dt * vy
   in
     { mario
       | x = newX
